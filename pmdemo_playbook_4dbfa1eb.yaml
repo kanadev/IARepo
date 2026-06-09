@@ -1,0 +1,24 @@
+- name: Install Security Update 5040438 on Windows Server 2008 R2
+  hosts: windows_servers
+  gather_facts: no
+  tasks:
+    - name: Download the Security Update 5040438
+      win_shell: |
+        if (-not (Test-Path -Path "C:\SecurityUpdates\5040438.msi")) {
+          Invoke-WebRequest -Uri "http://example.com/updates/5040438.msi" -OutFile "C:\SecurityUpdates\5040438.msi"
+        }
+      args:
+        executable: powershell
+      register: download_result
+
+    - name: Install Security Update 5040438
+      win_shell: |
+        Start-Process -FilePath "msiexec" -ArgumentList "/i C:\SecurityUpdates\5040438.msi /quiet" -Wait
+      args:
+        executable: powershell
+      when: download_result.stdout_line =~ "Download successful"
+
+    - name: Restart the Windows Server to apply the update
+      win_shell: Restart-Computer -Force
+      args:
+        executable: powershell
