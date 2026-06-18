@@ -1,0 +1,28 @@
+- name: Install Security Update 5039227 on Windows Server 2008 R2
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download the Security Update 5039227
+      win_shell: |
+        # Assuming the update file is downloaded to a known location
+        $updatePath = "C:\Updates\5039227.msi"
+        if (-Not (Test-Path -Path $updatePath)) {
+            # Placeholder for actual download logic
+            Write-Host "Download Security Update 5039227 to $updatePath"
+        }
+      register: download_result
+
+    - name: Install Security Update 5039227
+      win_shell: |
+        # Install the update using the MSI file
+        $updatePath = "C:\Updates\5039227.msi"
+        if (Test-Path -Path $updatePath) {
+            Start-Process -FilePath "msiexec" -ArgumentList "/i `"$updatePath`" /quiet" -Wait
+        }
+      register: install_result
+
+    - name: Restart the system to apply the update
+      win_shell: |
+        # Restart the server to ensure the update takes effect
+        Restart-Computer -Force -Confirm:$false
+      register: restart_result
