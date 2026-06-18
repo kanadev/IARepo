@@ -1,0 +1,21 @@
+- name: Install Security Update 5039213 on Windows Server 2008 R2
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download Security Update 5039213
+      win_shell: |
+        $url = "http://example.com/path/to/update5039213.msi"
+        $destination = "$env:SystemDrive\update5039213.msi"
+        Invoke-WebRequest -Uri $url -OutFile $destination
+      register: download_result
+
+    - name: Install Security Update 5039213
+      win_shell: |
+        $installerPath = "$env:SystemDrive\update5039213.msi"
+        Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$installerPath`" /quiet" -Wait
+      when: download_result.status == 200
+
+    - name: Restart the Windows Server to apply the update
+      win_reboot:
+        delay: 30
+        force_restart: yes
