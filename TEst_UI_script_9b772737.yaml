@@ -1,0 +1,24 @@
+- name: Install Security Update 5041580 on Windows Server 2008 R2
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Navigate to the directory where the update file is located
+      win_shell: |
+        cd C:\Path\To\Update
+      args:
+        executable: cmd
+      register: change_directory
+
+    - name: Install the Security Update 5041580
+      win_shell: |
+        msiexec /i SecurityUpdate5041580.msi
+      args:
+        executable: cmd
+      when: change_directory.stdout.find('C:\Path\To\Update') != -1
+
+    - name: Alternatively, install the Security Update 5041580 using setup.exe
+      win_shell: |
+        setup.exe /i SecurityUpdate5041580.exe
+      args:
+        executable: cmd
+      when: change_directory.stdout.find('C:\Path\To\Update') != -1
