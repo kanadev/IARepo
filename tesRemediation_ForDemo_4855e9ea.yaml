@@ -1,0 +1,25 @@
+- name: Install Security Update 5041847 on Windows Server 2008 R2
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download the security update
+      win_shell: |
+        $url = "http://example.com/security_update_5041847.msi"
+        $output = "C:\SecurityUpdate\security_update_5041847.msi"
+        Invoke-WebRequest -Uri $url -OutFile $output
+      register: download_result
+
+    - name: Install the security update
+      win_shell: |
+        $installPath = "C:\SecurityUpdate\security_update_5041847.msi"
+        Start-Process -FilePath $installPath -ArgumentList "/quiet" -Wait
+      when: download_result.status == 200
+
+    - name: Verify the installation
+      win_shell: |
+        $installed = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{GUID}" -ErrorAction SilentlyContinue
+        if ($installed) {
+            Write-Host "Security Update 5041847 installed successfully."
+        } else {
+            Write-Host "Security Update 5041847 installation failed."
+        }
