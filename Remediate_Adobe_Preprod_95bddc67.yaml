@@ -1,0 +1,25 @@
+- name: Install latest Adobe FrameMaker Publishing Server on Windows Server 2008 R2
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download Adobe FrameMaker Publishing Server installer
+      win_shell: |
+        $url = "https://example.com/path/to/adobe_frameMaker_publisher_server.exe"
+        $filePath = "$env:TEMP\adobe_frameMaker_publisher_server.exe"
+        Invoke-WebRequest -Uri $url -OutFile $filePath
+      register: download_result
+
+    - name: Install Adobe FrameMaker Publishing Server
+      win_shell: |
+        Start-Process -FilePath "$env:TEMP\adobe_frameMaker_publisher_server.exe" -ArgumentList "/S" -Wait
+      when: download_result.status == 200
+
+    - name: Verify installation
+      win_shell: |
+        Get-ChildItem -Path "C:\Program Files\Adobe\Adobe FrameMaker Publishing Server"
+      register: verify_result
+
+    - name: Ensure installation directory exists
+      fail:
+        msg: "Installation directory not found. Please check the installation process."
+      when: verify_result.stdout_lines | grep -q "Adobe FrameMaker Publishing Server"
