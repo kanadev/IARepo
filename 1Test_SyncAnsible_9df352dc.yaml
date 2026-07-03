@@ -1,0 +1,24 @@
+- name: Update and install  packages on Windows Server 2008 R2
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Update package lists
+      win_package:
+        name: "*"
+        state: present
+        refresh: yes
+
+    - name: Install updated packages
+      win_package:
+        name: "package1"
+        state: present
+
+    - name: Install another updated package
+      win_package:
+        name: "package2"
+        state: present
+
+    - name: Install a third updated package
+      win_package:
+        name: "package3"
+        state: present
