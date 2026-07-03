@@ -1,0 +1,33 @@
+- name: Install and configure Apache on Windows Server
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download Apache installer
+      win_shell: |
+        if (-not (Test-Path -Path "C:\Apache24")) {
+          Invoke-WebRequest -Uri "https://www.apache.org/dyn/cname.php?lang=en&os=win&file=http://archive.apache.org/dist/httpd/httpd-2.4.54-win64-VC17.zip" -OutFile "C:\Apache24.zip"
+        }
+      args:
+        executable: powershell
+      register: download_result
+
+    - name: Extract Apache installer
+      win_shell: |
+        Expand-Archive -Path "C:\Apache24.zip" -DestinationPath "C:\Apache24"
+      args:
+        executable: powershell
+      register: extract_result
+
+    - name: Install Apache
+      win_shell: |
+        Start-Process -FilePath "C:\Apache24\httpd-2.4.54\httpd.exe" -ArgumentList "/install", "/quiet" -Wait
+      args:
+        executable: powershell
+      register: install_result
+
+    - name: Configure Apache to start automatically
+      win_service:
+        name: Apache2.4
+        display_name: Apache HTTP Server
+        state: started
+        enabled: yes
