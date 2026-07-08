@@ -1,0 +1,17 @@
+- name: Install Security Update 5040437 on Windows Server 2008 R2 
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download the security update
+      win_shell: |
+        $webclient = New-Object System.Net.WebClient
+        $webclient.DownloadFile("http://example.com/updates/5040437.msi", "C:\Updates\5040437.msi")
+      register: download_result
+
+    - name: Install the security update
+      win_shell: |
+        Start-Process -FilePath "msiexec" -ArgumentList "/i C:\Updates\5040437.msi /quiet" -Wait
+      when: download_result is succeeded
+
+    - name: Restart the system to apply the update
+      win_shell: Restart-Computer -Force
