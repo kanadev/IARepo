@@ -1,0 +1,26 @@
+- name: Install Update on Windows Server 2008 R2
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Open Server Manager and navigate to the directory with the update file
+      win_shell: |
+        Start-Process -FilePath "C:\Windows\System32\ServMgr.exe" -ArgumentList "/S" -Wait
+        # Navigate to the directory where the update file is located
+        Set-Location -Path "C:\Path\To\Update\Directory"
+      register: server_manager_open
+
+    - name: Run the installation command to install the update
+      win_shell: |
+        # Assuming the update file is named "update.msi"
+        Start-Process -FilePath "msiexec.exe" -ArgumentList "/i C:\Path\To\Update\Directory\update.msi /quiet" -Wait
+      register: update_installation
+
+    - name: Verify the update installation
+      win_shell: |
+        # Check if the update is installed successfully
+        Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{UPDATE_GUID}" | Select-Object DisplayName, DisplayVersion
+      register: update_verification
+
+    - name: Output the result of the update installation
+      debug:
+        msg: "{{ update_verification.stdout }}"
