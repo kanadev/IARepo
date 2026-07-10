@@ -1,0 +1,12 @@
+- name: Install Update on Windows Server 2003
+  hosts: windows_servers
+  tasks:
+    - name: Navigate to the directory where the update file was downloaded
+      win_shell: |
+        cd C:\Updates
+      become: yes
+
+    - name: Install the update using msiexec command
+      win_shell: |
+        msiexec /i "C:\Updates\update_file.msi"
+      become: yes
