@@ -1,0 +1,30 @@
+- name: Install Security Update 5039225 on Windows Server 2008 R2
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download Security Update 5039225
+      win_get_url:
+        url: https://example.com/security_update_5039225.exe
+        dest: C:\Windows\security_update_5039225.exe
+
+    - name: Install Security Update 5039225
+      win_shell: |
+        Start-Process -FilePath "C:\Windows\security_update_5039225.exe" -ArgumentList "/quiet" -Wait
+      chdir: C:\Windows
+
+    - name: Restart the system to apply the update
+      win_reboot:
+        delay: 30
+        force: yes
+
+    - name: Verify the update installation
+      win_shell: |
+        Get-HotFix | Where-Object { $_.HotFixID -eq "5039225" }
+      register: update_installed
+
+    - name: Ensure the update is installed
+      assert:
+        that:
+          - update_installed.stdout -match "5039225"
+        fail_msg: "Security Update 5039225 installation failed"
+        success_msg: "Security Update 5039225 installed successfully"
