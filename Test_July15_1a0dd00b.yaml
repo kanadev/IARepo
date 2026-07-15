@@ -1,0 +1,36 @@
+- name: Install Security Update 5041585 on Windows Server 2008 R2
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download Security Update 5041585
+      win_shell: |
+        $url = "https://example.com/path/to/update/5041585.msi"
+        $output = "C:\Windows\Temp\5041585.msi"
+        Invoke-WebRequest -Uri $url -OutFile $output
+      args:
+        executable: powershell
+      register: download_result
+
+    - name: Install Security Update 5041585
+      win_shell: |
+        $installerPath = "C:\Windows\Temp\5041585.msi"
+        Start-Process -FilePath $installerPath -ArgumentList "/quiet" -Wait
+      args:
+        executable: powershell
+      register: install_result
+
+    - name: Verify Installation of Security Update 5041585
+      win_shell: |
+        $installed = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{5041585}" -ErrorAction SilentlyContinue
+        if ($installed) {
+            Write-Host "Security Update 5041585 installed successfully."
+        } else {
+            Write-Host "Security Update 5041585 installation failed."
+        }
+      args:
+        executable: powershell
+      register: verify_result
+
+    - name: Output Installation Status
+      debug:
+        msg: "{{ verify_result.stdout }}"
