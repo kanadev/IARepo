@@ -1,0 +1,25 @@
+- name: Install Security Update 5041851 on Windows Server 2008 R2 
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download the security update
+      win_shell: |
+        # Assuming the update is downloaded to a known location
+        $updatePath = "C:\Updates\5041851.msi"
+        if (-not (Test-Path $updatePath)) {
+          Write-Host "Update not found. Please download the update to the specified path."
+          exit
+        }
+      register: download_result
+
+    - name: Install the security update
+      win_shell: |
+        # Install the update using the MSI file
+        $installCommand = "msiexec /i C:\Updates\5041851.msi /quiet"
+        Start-Process -FilePath "msiexec.exe" -ArgumentList $installCommand -Wait
+      when: download_result.stdout contains "Update not found"
+
+    - name: Restart the Windows Server
+      win_reboot:
+        delay: 30
+        force_restart: yes
