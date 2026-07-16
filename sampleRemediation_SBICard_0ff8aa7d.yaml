@@ -1,0 +1,29 @@
+- name: Install Security Update 5040456 on Windows Server 2003
+  hosts: windows_servers
+  gather_facts: no
+  tasks:
+    - name: Download the Security Update 5040456
+      win_shell: |
+        # Assuming the update file is already downloaded to a known location
+        # For example, C:\Updates\5040456.msi
+        echo "Security Update 5040456 downloaded to C:\\Updates\\5040456.msi"
+      register: download_update
+
+    - name: Install the Security Update 5040456
+      win_shell: |
+        # Install the downloaded update
+        msiexec /i "C:\\Updates\\5040456.msi" /quiet
+      when: download_update.stdout.find("downloaded") != -1
+
+    - name: Verify the installation of Security Update 5040456
+      win_shell: |
+        # Check if the update is installed
+        wmic /namespace:\\root\cimv2 path Win32_QuickFixGuide where "HotFixID='5040456'" get HotFixID
+      register: install_verification
+
+    - name: Confirm successful installation
+      assert:
+        that:
+          - install_verification.stdout.find("5040456") != -1
+        fail_msg: "Security Update 5040456 installation failed"
+        success_msg: "Security Update 5040456 installed successfully"
