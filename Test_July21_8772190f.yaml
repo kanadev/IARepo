@@ -1,0 +1,27 @@
+- name: Install Update on Windows Server 2008 R2
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Navigate to the directory where the update file was downloaded
+      win_shell: |
+        cd C:\Updates
+      args:
+        executable: cmd
+      register: cd_result
+
+    - name: Run the installation command for the update
+      win_shell: |
+        msiexec /i {{ update_file }}
+      args:
+        executable: cmd
+      register: install_result
+
+    - name: Check if the installation was successful
+      debug:
+        msg: "Update installation completed successfully."
+      when: install_result.rc == 0
+
+    - name: Fail if the installation was not successful
+      fail:
+        msg: "Update installation failed. Please check the update file and try again."
+      when: install_result.rc != 0
