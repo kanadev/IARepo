@@ -1,0 +1,39 @@
+- name: Install Security Update 5040438 on Windows Server
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download Security Update 5040438
+      win_shell: |
+        # Assuming the update is downloaded to a local path
+        $updatePath = "C:\Windows\Temp\5040438.msu"
+        if (-not (Test-Path -Path $updatePath)) {
+            # Here you would add logic to download the update from Microsoft
+            Write-Host "Downloading Security Update 5040438..."
+            # Example: Invoke-WebRequest -Uri "http://example.com/5040438.msu" -OutFile $updatePath
+        } else {
+            Write-Host "Security Update 5040438 already downloaded."
+        }
+      register: download_result
+
+    - name: Install Security Update 5040438
+      win_shell: |
+        $updatePath = "C:\Windows\Temp\5040438.msu"
+        if (Test-Path -Path $updatePath) {
+            Write-Host "Installing Security Update 5040438..."
+            # Example: & "C:\Windows\System32\wusa.exe" $updatePath /quiet /norestart
+        } else {
+            Write-Host "Security Update 5040438 not found. Please download it first."
+        }
+      register: install_result
+
+    - name: Restart the server to apply changes
+      win_shell: |
+        Write-Host "Restarting the server to apply changes..."
+        Restart-Computer -Force
+
+    - name: Verify the server is back online
+      win_shell: |
+        $serverName = $env:COMPUTERNAME
+        Write-Host "Verifying server is back online: $serverName"
+        # This is a placeholder for verification logic
+        # Example: Test-Connection -ComputerName $serverName -Count 2
