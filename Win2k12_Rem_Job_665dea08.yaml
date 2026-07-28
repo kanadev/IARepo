@@ -1,0 +1,26 @@
+- name: Install Security Update 5040485 on Windows Server 2003
+  hosts: windows_servers
+  gather_facts: no
+  tasks:
+    - name: Download Security Update 5040485
+      win_reboot:
+        update: "5040485"
+        state: present
+      register: update_install
+
+    - name: Install Security Update 5040485
+      win_reboot:
+        update: "5040485"
+        state: installed
+      when: update_install.changed
+
+    - name: Verify Security Update Installation
+      win_reboot:
+        update: "5040485"
+        state: present
+      register: verify_install
+
+    - name: Confirm Security Update Installation
+      debug:
+        msg: "Security Update 5040485 installed successfully on Windows Server 2003"
+      when: verify_install.changed
