@@ -1,0 +1,31 @@
+- name: Install Apache OFBiz on Windows Server
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download Apache OFBiz installation package
+      win_shell: |
+        if (-not (Test-Path -Path "C:\ApacheOFBiz")) {
+          New-Item -ItemType Directory -Path "C:\ApacheOFBiz"
+        }
+        $url = "http://example.com/path/to/apache-ofbiz-<version>.exe"
+        $filePath = "C:\ApacheOFBiz\apache-ofbiz-<version>.exe"
+        Invoke-WebRequest -Uri $url -OutFile $filePath
+      vars:
+        version: "latest"
+
+    - name: Run the installation wizard for Apache OFBiz
+      win_shell: |
+        $filePath = "C:\ApacheOFBiz\apache-ofbiz-<version>.exe"
+        Start-Process -FilePath $filePath -ArgumentList "/S" -Wait
+      vars:
+        version: "latest"
+
+    - name: Verify Apache OFBiz installation
+      win_shell: |
+        if (Test-Path -Path "C:\ApacheOFBiz\apache-ofbiz-<version>") {
+          Write-Host "Apache OFBiz installation successful."
+        } else {
+          Write-Host "Apache OFBiz installation failed."
+        }
+      vars:
+        version: "latest"
