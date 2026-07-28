@@ -1,0 +1,19 @@
+- name: Install Security Update 5040437 and Restart Server
+  hosts: windows_servers
+  tasks:
+    - name: Download Security Update 5040437
+      win_reboot:
+        reboot_timeout: 300
+        force_reboot: yes
+        update: yes
+
+    - name: Install Security Update 5040437
+      win_updates:
+        update_id: 5040437
+        install: yes
+
+    - name: Restart the server
+      win_reboot:
+        reboot_timeout: 300
+        force_reboot: yes
+        update: yes
