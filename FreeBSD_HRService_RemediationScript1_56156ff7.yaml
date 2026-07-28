@@ -1,0 +1,16 @@
+- name: Update affected packages on Windows Server
+  hosts: windows_servers
+  gather_facts: no
+  tasks:
+    - name: Update packages using Chocolatey
+      win_chocolatey:
+        name: "*"
+        upgrade: yes
+        force: yes
+
+    - name: Update packages using Microsoft Update Catalog
+      win_update:
+        description: "Update Windows Server to the latest version using Microsoft Update Catalog"
+        update_service: wuauserv
+        reboot: yes
+        reboot_timeout: 300
