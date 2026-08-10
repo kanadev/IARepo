@@ -1,0 +1,39 @@
+- name: Install Security Update 5041828 on Windows Server 2008 R2
+  hosts: windows_servers
+  gather_facts: no
+  tasks:
+    - name: Download Security Update 5041828
+      win_shell: |
+        $webclient = New-Object System.Net.WebClient
+        $webclient.DownloadFile('http://example.com/path/to/update/5041828.msu', 'C:\Windows\Temp\5041828.msu')
+      args:
+        executable: powershell
+      register: download_result
+
+    - name: Install Security Update 5041828
+      win_shell: |
+        $installResult = & "C:\Windows\System32\msiexec.exe" /i "C:\Windows\Temp\5041828.msu" /quiet
+        if ($installResult -ne 0) {
+            Write-Host "Installation failed with error code $installResult"
+        }
+      args:
+        executable: powershell
+      register: install_result
+
+    - name: Restart the Windows Server to apply the update
+      win_shell: Restart-Computer -Force
+      args:
+        executable: powershell
+      when: install_result is defined
+
+    - name: Verify the update installation
+      win_shell: |
+        $updateStatus = Get-Hotfix | Where-Object { $_.HotFixID -eq '5041828' }
+        if ($updateStatus) {
+            Write-Host "Security Update 5041828 installed successfully."
+        } else {
+            Write-Host "Security Update 5041828 not found in installed updates."
+        }
+      args:
+        executable: powershell
+      when: install_result is defined
