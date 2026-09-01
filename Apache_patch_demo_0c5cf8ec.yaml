@@ -1,0 +1,26 @@
+- name: Upgrade Apache on Windows Server
+  hosts: windows
+  tasks:
+    - name: Download Apache version 2.4.60 or later
+      ansible.windows.win_download_url:
+        url: https://www.apache.org/dyn/closer.cgi/httpd/httpd-2.4.60/httpd-2.4.60-win32-x86.zip
+        destination: C:\Apache2.4.60
+        mode: 0644
+
+    - name: Unzip the downloaded Apache file
+      ansible.windows.win_unarchive:
+        src: C:\Apache2.4.60\httpd-2.4.60-win32-x86.zip
+        dest: C:\Apache2.4.60
+        remote_src: yes
+
+    - name: Replace existing Apache files with new ones
+      ansible.windows.win_copy:
+        src: C:\Apache2.4.60\
+        dest: C:\Apache\
+        remote_src: yes
+        force: yes
+
+    - name: Restart Apache service
+      ansible.windows.win_service:
+        name: Apache24
+        state: restarted
