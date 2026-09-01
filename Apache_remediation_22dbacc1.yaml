@@ -1,0 +1,27 @@
+- name: Upgrade Apache on Windows Server 2008
+  hosts: windows_servers
+  become: yes
+  tasks:
+    - name: Download Apache version 2.4.60 or later
+      win_get_url:
+        url: https://www.apache.org/dyn/closer.cgi/httpd/httpd-2.4.60.tar.gz
+        dest: C:\temp\httpd-2.4.60.tar.gz
+        mode: 0644
+
+    - name: Unzip the downloaded Apache file
+      win_unarchive:
+        src: C:\temp\httpd-2.4.60.tar.gz
+        dest: C:\Apache24
+        remote_src: yes
+        format: tar
+
+    - name: Replace existing Apache files with new ones
+      win_copy:
+        src: C:\Apache24\bin\httpd.exe
+        dest: C:\Windows\System32\
+        force: yes
+
+    - name: Restart the Apache service
+      win_service:
+        name: Apache24
+        state: restarted
