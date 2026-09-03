@@ -1,0 +1,19 @@
+- name: Install update on Windows Server 2008 R2
+  hosts: windows_server
+  tasks:
+    - name: Navigate to the directory where the update file is located
+      command: "cd <path_to_update_file>"
+      args:
+        chdir: <path_to_update_file>
+
+    - name: Install the update
+      command: "msiexec /i <update_file>"
+      when: ansible_os_family == "Windows"
+
+    - name: Verify update installation
+      win_shell: "systeminfo | findstr /C:\"OS Build\""
+      register: os_build_info
+
+    - name: Display the current OS build information
+      debug:
+        msg: "Current OS Build: {{ os_build_info.stdout }}"
