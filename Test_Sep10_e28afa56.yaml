@@ -1,0 +1,20 @@
+- name: Install Windows Update and Restart Server
+  hosts: windows_servers
+  tasks:
+    - name: Open Control Panel and navigate to Windows Update 
+      win_shell: |
+        rundll32.exe shell32.dll,ShellAbout "Control Panel" /e
+        Control Panel /namea:Windows Update
+
+    - name: Click on Install Updates button and select downloaded update file
+      win_shell: |
+        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ShellOpenVerb" -Name "Update" -Value "Install"
+        Start-Process -FilePath "C:\Path\To\Update.msu" -ArgumentList "/quiet /norestart"
+
+    - name: Follow on-screen instructions to install the update
+      win_shell: |
+        Start-Process -FilePath "C:\Path\To\Update.msu" -ArgumentList "/quiet /norestart"
+
+    - name: Restart the system to ensure the update takes effect
+      win_shell: |
+        Restart-Computer -Force
