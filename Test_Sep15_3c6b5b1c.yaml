@@ -1,0 +1,21 @@
+- name: Install update on Windows Server 2008 R2
+  hosts: windows
+  tasks:
+    - name: Navigate to the directory where the update file is located
+      command: cd C:\path\to\update\directory
+      args:
+        chdir: C:\path\to\update\directory
+
+    - name: Install the update
+      command: msiexec /i <update_file>
+      args:
+        chdir: C:\path\to\update\directory
+        cmd: msiexec /i <update_file>
+
+    - name: Verify update installation
+      win_shell: Get-HotfixWindowsUpdate -UpdateName "<update_name>"
+      register: update_status
+
+    - name: Display update installation status
+      debug:
+        msg: "Update installed successfully: {{ update_status.stdout }}"
