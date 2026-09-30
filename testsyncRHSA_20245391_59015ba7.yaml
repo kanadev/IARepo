@@ -1,0 +1,17 @@
+- name: Install update on Red Hat Enterprise Linux 9
+  hosts: all
+  become: yes
+  tasks:
+    - name: Check if update file exists
+      shell: "ls -l /path/to/update_file"
+      register: update_file_check
+
+    - name: Install update using yum
+      shell: "sudo yum install /path/to/update_file"
+      when: "'update_file_check' | regex_search('.*\\d.*')"
+      ignore_errors: yes
+
+    - name: Install update using apt if yum fails
+      shell: "sudo apt install /path/to/update_file"
+      when: "'update_file_check' | regex_search('.*\\d.*')"
+      ignore_errors: yes
