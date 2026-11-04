@@ -1,0 +1,17 @@
+- name: Install update on Windows Server 2003
+  hosts: windows_server_2003
+  tasks:
+    - name: Navigate to the directory where the update file is located
+      shell: cd <path_to_update_file>
+      args:
+        chdir: <path_to_update_file>
+
+    - name: Install the update
+      shell: msiexec /i <update_file>
+      args:
+        chdir: <path_to_update_file>
+      register: install_output
+
+    - name: Display the installation output
+      debug:
+        msg: "{{ install_output.stdout }}"
